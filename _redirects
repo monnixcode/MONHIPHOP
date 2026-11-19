@@ -1,0 +1,7 @@
+# Repo files that are not part of the website -> 404 (Cloudflare Pages)
+/supabase/*   /404.html  404
+/shared/*     /404.html  404
+/functions/*  /404.html  404
+/SETUP.md     /404.html  404
+/SKiLL.md     /404.html  404
+/wrangler.toml /404.html 404

@@ -1,0 +1,12 @@
+# Cloudflare Pages configuration (https://developers.cloudflare.com/pages/)
+#
+# - Build output = the repo root (the site lives in the root; _redirects hides repo-only files).
+# - `functions/` at the project root is picked up automatically:
+#     /a/<username>  → live share preview for an artist
+#     /v/<video id>  → live share preview for a music video
+#     /s/<username> → the artist's own share page (HTML + CSS + JS, template in shared/)
+# - Nothing else in the repo (supabase/, README) is published.
+
+name = "monhiphop"
+compatibility_date = "2026-10-01"
+pages_build_output_dir = "."

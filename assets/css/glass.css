@@ -1,0 +1,146 @@
+/* ============ Mon HipHop — GLASS UI + MOTION (v6) ============
+ * Loaded last on every public page, so it restyles the existing components without touching them.
+ *  - header / menu bar: red glass with white text
+ *  - cards, panels, dialogs, player: translucent glass with a moving light that follows the pointer
+ *  - living background (slow floating colour), springy reveal, hover lift
+ *  - everything calms down with prefers-reduced-motion
+ */
+:root{
+ --g-fill:rgba(255,255,255,.055);--g-fill2:rgba(255,255,255,.10);--g-edge:rgba(255,255,255,.14);--g-edge2:rgba(255,255,255,.28);
+ --g-blur:18px;--g-shadow:0 18px 50px rgba(0,0,0,.45);--spring:cubic-bezier(.2,.9,.25,1.15);
+}
+html{background:#0a0a0d}
+body{background:transparent;position:relative;min-height:100vh}
+
+/* ---------- living background ---------- */
+body::before,body::after{content:"";position:fixed;z-index:-2;pointer-events:none;border-radius:50%;filter:blur(90px);opacity:.42;will-change:transform}
+body::before{width:60vmax;height:60vmax;left:-18vmax;top:-22vmax;background:radial-gradient(circle,#d4a64a 0%,rgba(212,166,74,0) 68%);animation:gDrift1 26s ease-in-out infinite alternate}
+body::after{width:56vmax;height:56vmax;right:-20vmax;bottom:-22vmax;background:radial-gradient(circle,#ff2a45 0%,rgba(255,42,69,0) 68%);animation:gDrift2 32s ease-in-out infinite alternate;opacity:.3}
+@keyframes gDrift1{to{transform:translate3d(12vmax,10vmax,0) scale(1.15)}}
+@keyframes gDrift2{to{transform:translate3d(-12vmax,-8vmax,0) scale(1.1)}}
+main{position:relative}
+
+/* ---------- header / menu bar — RED glass, WHITE text ---------- */
+#top{--hd:#fff;background:linear-gradient(180deg,rgba(255,42,69,.88),rgba(200,31,56,.82))!important;border-bottom:1px solid rgba(255,255,255,.22);box-shadow:0 8px 28px rgba(200,31,56,.35),inset 0 1px 0 rgba(255,255,255,.3);color:#fff;transition:box-shadow .35s,background .35s}
+/* blur lives on ::before — backdrop-filter on #top itself would trap the fixed mobile menu inside the 64px bar */
+#top::before{content:'';position:absolute;inset:0;z-index:-1;backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%)}
+#top.stuck{background:linear-gradient(180deg,rgba(255,42,69,.94),rgba(190,28,52,.9))!important;box-shadow:0 12px 34px rgba(200,31,56,.5),inset 0 1px 0 rgba(255,255,255,.3)}
+#top .brand,#top .brand span,#menu a,#menu a.on,#menu a:hover,#top .auth a,#top .auth .me,#top .auth .me span{color:#fff!important}
+#menu a{position:relative;background:none!important;font-weight:600}
+#menu a .tag,#menu a i.tag{background:#fff;color:#c81f38}
+#menu a::after{content:"";position:absolute;left:14px;right:14px;bottom:3px;height:2px;border-radius:2px;background:#fff;transform:scaleX(0);transform-origin:left;transition:transform .35s var(--spring)}
+#menu a:hover::after,#menu a.on::after{transform:scaleX(1)}
+#menu a:not(.on){opacity:.88}#menu a:hover,#menu a.on{opacity:1}
+.brand img{filter:invert(1) brightness(2);transition:transform .6s var(--spring)}.brand:hover img{transform:rotate(-8deg) scale(1.1)}
+#top .auth .btn.ghost{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.7);color:#fff!important}
+#top .auth .btn.ghost:hover{background:rgba(255,255,255,.24);border-color:#fff}
+#top .auth .btn.solid{background:#fff;border-color:#fff;color:#c81f38!important;box-shadow:0 8px 22px rgba(0,0,0,.25)}
+#top .auth .btn.solid:hover{background:#ffe9ec}
+#top .auth a.me{border-color:rgba(255,255,255,.6)}
+#menu-btn i{background:#fff}
+@media(max-width:1180px){
+ /* mobile menu panel: red frosted glass */
+ #menu{background:linear-gradient(180deg,rgba(220,34,60,.9),rgba(150,22,42,.94))!important;backdrop-filter:blur(26px) saturate(170%);-webkit-backdrop-filter:blur(26px) saturate(170%);border-top:1px solid rgba(255,255,255,.25)}
+ #menu a{opacity:0;transform:translateX(-14px);transition:opacity .4s,transform .45s var(--spring),color .2s}
+ #menu.open a{opacity:1;transform:none}
+ #menu.open a:nth-child(2){transition-delay:.04s}#menu.open a:nth-child(3){transition-delay:.08s}#menu.open a:nth-child(4){transition-delay:.12s}
+ #menu.open a:nth-child(5){transition-delay:.16s}#menu.open a:nth-child(6){transition-delay:.2s}#menu.open a:nth-child(7){transition-delay:.24s}#menu.open a:nth-child(8){transition-delay:.28s}
+ #menu a::after{left:8px;right:auto;width:36px;bottom:8px}
+}
+
+/* ---------- glass surfaces ---------- */
+.card,.artist,.release,.video,.panel,.share-panel,.stat-card,.feat>div,.acct-hero,.soon-card,
+dialog,dialog.auth-dlg,.cookie-consent,#nowp,.cc-opt{
+ --mx:50%;--my:0%;
+ background:linear-gradient(155deg,var(--g-fill2),var(--g-fill) 55%)!important;
+ border:1px solid var(--g-edge)!important;
+ backdrop-filter:blur(var(--g-blur)) saturate(150%);-webkit-backdrop-filter:blur(var(--g-blur)) saturate(150%);
+ box-shadow:var(--g-shadow),inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(255,255,255,.03);
+}
+.artist,.release,.video,.card,.panel,.stat-card,.share-panel{position:relative;transition:transform .5s var(--spring),border-color .3s,box-shadow .3s,opacity .5s}
+/* light that follows the pointer (set by app.js) */
+.artist::after,.release::after,.video::after,.card::after,.panel::after,.stat-card::after,.share-panel::after{
+ content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;opacity:0;transition:opacity .3s;
+ background:radial-gradient(240px circle at var(--mx) var(--my),rgba(255,255,255,.16),transparent 62%)}
+.artist:hover::after,.release:hover::after,.video:hover::after,.card:hover::after,.panel:hover::after,.stat-card:hover::after,.share-panel:hover::after{opacity:1}
+@media(hover:hover){
+ .artist:hover,.release:hover,.video:hover,.card:hover,.stat-card:hover{transform:translateY(-6px);border-color:var(--g-edge2)!important;box-shadow:0 26px 60px rgba(0,0,0,.55),0 0 0 1px rgba(212,166,74,.18),inset 0 1px 0 rgba(255,255,255,.3)}
+}
+.artist .avatar{border-color:rgba(20,20,26,.9);box-shadow:0 8px 22px rgba(0,0,0,.45);transition:transform .5s var(--spring)}.artist:hover .avatar{transform:scale(1.07) rotate(-3deg)}
+.artist .cover img,.release .art img,.video .thumb img{transition:transform .8s var(--spring)}
+.artist:hover .cover img,.release:hover .art img,.video:hover .thumb img{transform:scale(1.07)}
+.ahead .avatar{border-color:rgba(10,10,13,.8);box-shadow:0 12px 34px rgba(0,0,0,.5)}
+.aprof .cover{border:1px solid var(--g-edge);box-shadow:var(--g-shadow)}
+
+/* dialogs */
+dialog{border-radius:22px;animation:gDlg .45s var(--spring)}
+@keyframes gDlg{from{opacity:0;transform:translateY(18px) scale(.96)}}
+dialog::backdrop{background:rgba(6,6,10,.5);backdrop-filter:blur(10px) saturate(130%);-webkit-backdrop-filter:blur(10px) saturate(130%)}
+dialog.video-dlg{background:rgba(10,10,14,.7)!important}
+
+/* player bar */
+#player{background:rgba(14,14,18,.5)!important;backdrop-filter:blur(26px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);border-top:1px solid var(--g-edge);box-shadow:0 -12px 40px rgba(0,0,0,.35)}
+#nowp{background:rgba(16,16,20,.55)!important}
+@media(max-width:860px){#nowp{background:linear-gradient(rgba(38,34,44,.72),rgba(10,10,13,.9) 70%)!important}}
+
+/* controls */
+.btn{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .3s var(--spring),background .25s,border-color .25s,box-shadow .3s,color .25s}
+.btn:hover{transform:translateY(-2px)}.btn:active{transform:scale(.97)}
+.btn.solid{background:linear-gradient(135deg,var(--gold),#f0d08a);border-color:transparent;box-shadow:0 10px 30px rgba(212,166,74,.28)}
+.btn.solid:hover{background:linear-gradient(135deg,#f0d08a,var(--gold));box-shadow:0 14px 38px rgba(212,166,74,.45)}
+.btn.ghost{background:var(--g-fill)}.btn.ghost:hover{background:var(--g-fill2);border-color:var(--g-edge2)}
+.chip{background:var(--g-fill);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .25s var(--spring),background .2s,color .2s}.chip:hover{transform:translateY(-2px)}
+input,textarea,select{background:rgba(255,255,255,.05);border-color:var(--g-edge);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:border-color .2s,box-shadow .25s,background .2s}
+input:focus,textarea:focus,select:focus{background:rgba(255,255,255,.09);box-shadow:0 0 0 4px rgba(212,166,74,.14)}
+.socials a,.share .sh{background:var(--g-fill)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-color:var(--g-edge)!important;transition:transform .3s var(--spring),background .2s,color .2s,box-shadow .3s}
+.socials a:hover{transform:translateY(-4px) scale(1.08);box-shadow:0 10px 24px rgba(212,166,74,.35)}
+.share .sh:hover{box-shadow:0 10px 24px rgba(0,0,0,.4)}
+.trk{transition:background .2s,transform .3s var(--spring)}.trk:hover{background:var(--g-fill2);transform:translateX(4px)}
+.fab,.playall{box-shadow:0 10px 28px rgba(212,166,74,.4)}
+.fab{opacity:0;transform:translateY(10px) scale(.85)}.release:hover .fab,.fab:focus-visible,.fab.on{opacity:1;transform:none}
+@media(hover:none){.fab{opacity:1;transform:none}}
+footer{border-top-color:var(--g-edge);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#toast{background:rgba(255,255,255,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.hero h1,.page-head h1{background:linear-gradient(120deg,#fff 20%,#f0d08a 55%,#fff 85%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gShine 9s ease-in-out infinite alternate}
+.hero h1 em{-webkit-text-fill-color:var(--gold)}
+@keyframes gShine{to{background-position:100% 0}}
+
+/* ---------- motion ---------- */
+.rv{opacity:0;transform:translateY(26px) scale(.97);transition:opacity .7s,transform .8s var(--spring),border-color .3s,box-shadow .3s}
+.rv.in{opacity:1;transform:none}
+.grid>.rv:nth-child(3n+2){transition-delay:.07s}.grid>.rv:nth-child(3n+3){transition-delay:.14s}
+.sk{background:linear-gradient(100deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.12) 50%,rgba(255,255,255,.04) 75%) 0 0/200% 100%;border:1px solid var(--g-edge)}
+.cookie-consent{animation:gDlg .6s var(--spring) both}
+
+/* backdrop-filter fallback */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ .card,.artist,.release,.video,.panel,.share-panel,.stat-card,dialog,#player,#nowp,.cookie-consent{background:rgba(24,24,30,.94)!important}
+ #menu{background:rgba(14,14,18,.96)!important}
+}
+@media(max-width:700px){:root{--g-blur:12px}body::before,body::after{filter:blur(70px)}}
+@media(prefers-reduced-motion:reduce){
+ body::before,body::after,.hero h1,.page-head h1,dialog,.cookie-consent{animation:none!important}
+ .rv{opacity:1;transform:none}.artist:hover,.release:hover,.video:hover,.card:hover,.stat-card:hover,.trk:hover{transform:none}
+ #menu a{opacity:1;transform:none}
+}
+
+/* ===== Gold menu bar: hover / press / selected item (Home, Artists, ...) turns gold ===== */
+:root{--gold-hi:#f6dc9a;--gold-mid:#d4a64a;--gold-lo:#a87a22}
+#menu a{-webkit-tap-highlight-color:rgba(212,166,74,.35);transition:color .2s,background .2s,box-shadow .2s,opacity .2s,transform .45s var(--spring)}
+#menu a:hover,#menu a:focus-visible,#menu a:active{
+ color:#2a1d04!important;opacity:1;
+ background:linear-gradient(135deg,var(--gold-hi),var(--gold-mid))!important;
+ box-shadow:0 0 0 1px rgba(255,236,170,.65),0 6px 18px rgba(212,166,74,.45)}
+#menu a.on,#menu a[aria-current="page"]{
+ color:#2a1d04!important;opacity:1;font-weight:700;
+ background:linear-gradient(135deg,var(--gold-hi),var(--gold-mid) 55%,var(--gold-lo))!important;
+ box-shadow:0 0 0 1px rgba(255,236,170,.7),0 6px 18px rgba(212,166,74,.5),inset 0 1px 0 rgba(255,255,255,.55)}
+#menu a::after{background:var(--gold-hi)}
+#menu a.on::after,#menu a:hover::after,#menu a:active::after{background:#2a1d04}
+#menu a .tag,#menu a i.tag{background:var(--gold-mid);color:#2a1d04}
+#menu-btn i{background:var(--gold-hi)!important;box-shadow:0 0 8px rgba(212,166,74,.7)}
+#menu-btn:active i,#menu-btn.open i{background:var(--gold-mid)!important}
+@media(max-width:860px){
+ #menu a:hover,#menu a:active,#menu a.on{border-radius:12px}
+ #menu{border-top:1px solid rgba(212,166,74,.6)!important}
+}
